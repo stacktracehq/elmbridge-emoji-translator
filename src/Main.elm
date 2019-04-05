@@ -1,6 +1,7 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
+import EmojiConverter exposing (textToEmoji)
 import Html
 import Html.Attributes
 import Html.Events
@@ -23,13 +24,22 @@ main =
 -- MODEL
 
 
+type Direction
+    = TextToEmoji
+    | EmojiToText
+
+
 type alias Model =
-    { currentText : String }
+    { currentText : String
+    , direction : Direction
+    }
 
 
 init : Model
 init =
-    { currentText = "" }
+    { currentText = ""
+    , direction = TextToEmoji
+    }
 
 
 
@@ -38,6 +48,7 @@ init =
 
 type Msg
     = SetCurrentText String
+    | ToggleDirection
 
 
 update : Msg -> Model -> Model
@@ -46,9 +57,32 @@ update msg model =
         SetCurrentText newText ->
             { model | currentText = newText }
 
+        ToggleDirection ->
+            case model.direction of
+                TextToEmoji ->
+                    { model | direction = EmojiToText }
+
+                EmojiToText ->
+                    { model | direction = TextToEmoji }
+
 
 
 -- VIEW
+
+
+defaultKey : String
+defaultKey =
+    "😅"
+
+
+translateText : Model -> String
+translateText model =
+    case model.direction of
+        TextToEmoji ->
+            EmojiConverter.textToEmoji defaultKey model.currentText
+
+        EmojiToText ->
+            EmojiConverter.emojiToText defaultKey model.currentText
 
 
 view : Model -> Html.Html Msg
@@ -82,5 +116,16 @@ view model =
                     []
                 ]
             ]
-        , Html.p [ Html.Attributes.class "center output-text emoji-size" ] [ Html.text model.currentText ]
+        , Html.div
+            [ Html.Attributes.class "switch center" ]
+            [ Html.label []
+                [ Html.text "Translate Text"
+                , Html.input [ Html.Attributes.type_ "checkbox" ] []
+                , Html.span [ Html.Attributes.class "lever", Html.Events.onClick ToggleDirection ] []
+                , Html.text "Translate Emoji"
+                ]
+            ]
+        , Html.p
+            [ Html.Attributes.class "center output-text emoji-size" ]
+            [ Html.text (translateText model) ]
         ]
