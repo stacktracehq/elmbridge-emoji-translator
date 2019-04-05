@@ -4,6 +4,7 @@ import Browser
 import Html
 import Html.Attributes
 import Html.Events
+import EmojiConverter
 
 
 
@@ -22,14 +23,21 @@ main =
 
 -- MODEL
 
+type Direction = TextToEmoji
+               | EmojiToText
+
 
 type alias Model =
-    { currentText : String }
+    { currentText : String
+    , direction : Direction
+    }
 
 
 init : Model
 init =
-    { currentText = "" }
+    { currentText = ""
+    , direction = TextToEmoji
+    }
 
 
 
@@ -38,6 +46,7 @@ init =
 
 type Msg
     = SetCurrentText String
+    | ToggleDirection
 
 
 update : Msg -> Model -> Model
@@ -45,11 +54,30 @@ update msg model =
     case msg of
         SetCurrentText newText ->
             -- currently, this does nothing!
-            model
+            { model | currentText = newText }
+        ToggleDirection ->
+            let 
+                newDirection = 
+                    case model.direction of
+                        TextToEmoji ->
+                            EmojiToText
+                        EmojiToText ->
+                            TextToEmoji
+            in
+            { model | direction = newDirection }
 
 
 
 -- VIEW
+
+defaultKey = "key"
+
+translateText model =
+    case model.direction of
+        TextToEmoji ->
+            EmojiConverter.textToEmoji defaultKey model.currentText
+        EmojiToText ->
+            EmojiConverter.emojiToText defaultKey model.currentText
 
 
 view : Model -> Html.Html Msg
@@ -83,4 +111,24 @@ view model =
                     []
                 ]
             ]
+        , Html.div
+            [ Html.Attributes.class "switch center" ]
+            [
+                Html.label 
+                    []
+                    [ Html.text "Translate text"
+                    , Html.input
+                        [ Html.Attributes.type_ "checkbox"
+                        , Html.Events.onClick ToggleDirection
+                        ]
+                        []
+                    , Html.span
+                        [ Html.Attributes.class "lever" ]
+                        []
+                    , Html.text "Translate Emoji"
+                    ]
+            ]
+        , Html.p
+            [ Html.Attributes.class "center output-text emoji-size" ]
+            [ Html.text (translateText model) ]
         ]
