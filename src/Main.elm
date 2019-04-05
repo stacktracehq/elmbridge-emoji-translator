@@ -30,6 +30,7 @@ type Direction = TextToEmoji
 type alias Model =
     { currentText : String
     , direction : Direction
+    , currentKey : String
     }
 
 
@@ -37,6 +38,7 @@ init : Model
 init =
     { currentText = ""
     , direction = TextToEmoji
+    , currentKey = defaultKey
     }
 
 
@@ -47,6 +49,7 @@ init =
 type Msg
     = SetCurrentText String
     | ToggleDirection
+    | SetSelectedKey String
 
 
 update : Msg -> Model -> Model
@@ -65,20 +68,40 @@ update msg model =
                             TextToEmoji
             in
             { model | direction = newDirection }
+        SetSelectedKey key ->
+            { model | currentKey = key }
 
 
 
 -- VIEW
 
-defaultKey = "key"
+defaultKey = "😡"
 
 translateText model =
     case model.direction of
         TextToEmoji ->
-            EmojiConverter.textToEmoji defaultKey model.currentText
+            EmojiConverter.textToEmoji model.currentKey model.currentText
         EmojiToText ->
-            EmojiConverter.emojiToText defaultKey model.currentText
+            EmojiConverter.emojiToText model.currentKey model.currentText
 
+renderKey currentKey x = 
+    Html.div 
+        [ Html.Attributes.class "col s2 m1 emoji-size"
+        , Html.Events.onClick (SetSelectedKey x)
+        ]
+        [ Html.div 
+            [ Html.Attributes.classList
+                [ ( "key-selector", True )
+                , ( "is-selected", x == currentKey )
+                ]
+            ]
+            [ Html.text x ]
+        ] 
+
+renderKeys currentKey =
+    Html.div
+        [ Html.Attributes.class "row" ]
+        (List.map (\emoji -> renderKey currentKey emoji) EmojiConverter.supportedEmojis)
 
 view : Model -> Html.Html Msg
 view model =
@@ -131,4 +154,10 @@ view model =
         , Html.p
             [ Html.Attributes.class "center output-text emoji-size" ]
             [ Html.text (translateText model) ]
+        , Html.section [ Html.Attributes.class "container" ]
+            [ Html.h4 [ Html.Attributes.class "center" ]
+                [ Html.text "Select Your Key" ]
+            , renderKeys model.currentKey
+            ]
         ]
+        
