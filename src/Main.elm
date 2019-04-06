@@ -83,6 +83,6 @@ view model =
                 ]
             , Html.p
                 [ Html.Attributes.class "centre output-text emoji-size" ]
-                [ Html.text "It's happening!" ]
+                [ Html.text model.currentText ]
             ]
         ]
