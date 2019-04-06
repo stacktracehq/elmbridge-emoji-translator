@@ -44,8 +44,7 @@ update : Msg -> Model -> Model
 update msg model =
     case msg of
         SetCurrentText newText ->
-            -- currently, this does nothing!
-            model
+            { model | currentText = newText }
 
 
 
@@ -67,7 +66,7 @@ view model =
                 [ Html.Attributes.class "nav-wrapper light-blue lighten-2" ]
                 [ Html.div
                     [ Html.Attributes.class "brand-logo center" ]
-                    [ Html.text "Elmoji Translator" ]
+                    [ Html.text "Chris's Elmoji Translator" ]
                 ]
             ]
         , Html.section
@@ -77,7 +76,7 @@ view model =
                 [ Html.input
                     [ Html.Attributes.type_ "text"
                     , Html.Attributes.class "center"
-                    , Html.Attributes.placeholder "Let's Translate!"
+                    , Html.Attributes.placeholder "Let's Translate! At Pace!!!!"
                     , Html.Events.onInput SetCurrentText
                     ]
                     []
