@@ -29,7 +29,7 @@ type alias Model =
 
 init : Model
 init =
-    { currentText = "" }
+    { currentText = "check it" }
 
 
 
