@@ -1,6 +1,7 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
 import Browser
+import EmojiConverter
 import Html
 import Html.Attributes
 import Html.Events
@@ -24,12 +25,16 @@ main =
 
 
 type alias Model =
-    { currentText : String }
+    { currentText : String
+    , defaultKey : String
+    }
 
 
 init : Model
 init =
-    { currentText = "" }
+    { currentText = ""
+    , defaultKey = "😎"
+    }
 
 
 
@@ -45,6 +50,14 @@ update msg model =
     case msg of
         SetCurrentText newText ->
             { model | currentText = newText }
+
+
+
+-- HELPERS
+
+
+translateCurrentText model =
+    EmojiConverter.textToEmoji model.defaultKey model.currentText
 
 
 
@@ -82,7 +95,7 @@ view model =
                     []
                 , Html.p
                     [ Html.Attributes.class "center output-text emoji-size" ]
-                    [ Html.text model.currentText ]
+                    [ Html.text (translateCurrentText model) ]
                 ]
             ]
         ]
