@@ -95,5 +95,19 @@ view model =
             , Html.p
                 [ Html.Attributes.class "centre output-text emoji-size" ]
                 [ Html.text (translateText model) ]
+            , Html.div
+                [ Html.Attributes.class "switch center" ]
+                [ Html.label
+                    []
+                    [ Html.text "Translate Text"
+                    , Html.input
+                        [ Html.Attributes.type_ "checkbox" ]
+                        []
+                    , Html.span
+                        [ Html.Attributes.class "lever" ]
+                        []
+                    , Html.text "Translate Emoji"
+                    ]
+                ]
             ]
         ]
