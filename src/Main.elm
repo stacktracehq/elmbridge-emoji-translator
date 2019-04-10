@@ -32,6 +32,7 @@ type Direction
 type alias Model =
     { currentText : String
     , direction : Direction
+    , selectedKey : String
     }
 
 
@@ -39,6 +40,7 @@ init : Model
 init =
     { currentText = ""
     , direction = TextToEmoji
+    , selectedKey = defaultKey
     }
 
 
@@ -49,6 +51,7 @@ init =
 type Msg
     = SetCurrentText String
     | ToggleDirection
+    | SetSelectedKey String
 
 
 update : Msg -> Model -> Model
@@ -65,6 +68,9 @@ update msg model =
                 EmojiToText ->
                     { model | direction = TextToEmoji }
 
+        SetSelectedKey emoji ->
+            { model | selectedKey = emoji }
+
 
 
 -- VIEW
@@ -79,10 +85,35 @@ translateText : Model -> String
 translateText model =
     case model.direction of
         TextToEmoji ->
-            EmojiConverter.textToEmoji defaultKey model.currentText
+            EmojiConverter.textToEmoji model.selectedKey model.currentText
 
         EmojiToText ->
-            EmojiConverter.emojiToText defaultKey model.currentText
+            EmojiConverter.emojiToText model.selectedKey model.currentText
+
+
+renderKey : Model -> String -> Html.Html Msg
+renderKey model emoji =
+    Html.div
+        [ Html.Attributes.class "col s2 m1 emoji-size" ]
+        [ Html.div
+            [ Html.Attributes.classList
+                [ ( "key-selector", True )
+                , ( "is-selected", emoji == model.selectedKey )
+                ]
+            , Html.Events.onClick (SetSelectedKey emoji)
+            ]
+            [ Html.text emoji ]
+        ]
+
+
+renderKeys : Model -> Html.Html Msg
+renderKeys model =
+    Html.div
+        [ Html.Attributes.class "row" ]
+        (List.map
+            (\emoji -> renderKey model emoji)
+            EmojiConverter.supportedEmojis
+        )
 
 
 view : Model -> Html.Html Msg
@@ -124,6 +155,14 @@ view model =
                 , Html.span [ Html.Attributes.class "lever", Html.Events.onClick ToggleDirection ] []
                 , Html.text "Translate Emoji"
                 ]
+            ]
+        , Html.div
+            [ Html.Attributes.class "divider" ]
+            []
+        , Html.section
+            [ Html.Attributes.class "container" ]
+            [ Html.h4 [ Html.Attributes.class "center" ] []
+            , renderKeys model
             ]
         , Html.p
             [ Html.Attributes.class "center output-text emoji-size" ]
