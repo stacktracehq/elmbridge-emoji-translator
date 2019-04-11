@@ -7,6 +7,11 @@ import Html.Attributes
 import Html.Events
 
 
+type Direction
+    = TextToEmoji
+    | EmojiToText
+
+
 defaultKey : String
 defaultKey =
     "😅"
@@ -30,12 +35,14 @@ main =
 
 
 type alias Model =
-    { currentText : String }
+    { currentText : String
+    , direction : Direction
+    }
 
 
 init : Model
 init =
-    { currentText = "check it" }
+    { currentText = "check it", direction = TextToEmoji }
 
 
 
@@ -44,6 +51,7 @@ init =
 
 type Msg
     = SetCurrentText String
+    | ToggleDirection
 
 
 update : Msg -> Model -> Model
@@ -52,10 +60,23 @@ update msg model =
         SetCurrentText newText ->
             { model | currentText = newText }
 
+        ToggleDirection ->
+            case model.direction of
+                TextToEmoji ->
+                    { model | direction = EmojiToText }
+
+                EmojiToText ->
+                    { model | direction = TextToEmoji }
+
 
 translateText : Model -> String
 translateText model =
-    EmojiConverter.textToEmoji defaultKey model.currentText
+    case model.direction of
+        TextToEmoji ->
+            EmojiConverter.textToEmoji defaultKey model.currentText
+
+        EmojiToText ->
+            EmojiConverter.emojiToText defaultKey model.currentText
 
 
 
@@ -101,7 +122,7 @@ view model =
                     []
                     [ Html.text "Translate Text"
                     , Html.input
-                        [ Html.Attributes.type_ "checkbox" ]
+                        [ Html.Attributes.type_ "checkbox", Html.Events.onClick ToggleDirection ]
                         []
                     , Html.span
                         [ Html.Attributes.class "lever" ]
