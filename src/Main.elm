@@ -17,6 +17,36 @@ defaultKey =
     "😅"
 
 
+translateText : Model -> String
+translateText model =
+    case model.direction of
+        TextToEmoji ->
+            EmojiConverter.textToEmoji model.selectedKey model.currentText
+
+        EmojiToText ->
+            EmojiConverter.emojiToText model.selectedKey model.currentText
+
+
+renderKeys model =
+    Html.div
+        [ Html.Attributes.class "row" ]
+        (List.map (\emoji -> renderKey model emoji) EmojiConverter.supportedEmojis)
+
+
+renderKey model emoji =
+    Html.div
+        [ Html.Attributes.class "col s2 m1 emoji-size" ]
+        [ Html.div
+            [ Html.Attributes.classList
+                [ ( "key-selector", True )
+                , ( "is-selected", emoji == model.selectedKey )
+                ]
+            , Html.Events.onClick (SetSelectedKey emoji)
+            ]
+            [ Html.text emoji ]
+        ]
+
+
 
 -- MAIN
 
@@ -37,12 +67,13 @@ main =
 type alias Model =
     { currentText : String
     , direction : Direction
+    , selectedKey : String
     }
 
 
 init : Model
 init =
-    { currentText = "check it", direction = TextToEmoji }
+    { currentText = "check it", direction = TextToEmoji, selectedKey = defaultKey }
 
 
 
@@ -52,6 +83,7 @@ init =
 type Msg
     = SetCurrentText String
     | ToggleDirection
+    | SetSelectedKey String
 
 
 update : Msg -> Model -> Model
@@ -68,15 +100,8 @@ update msg model =
                 EmojiToText ->
                     { model | direction = TextToEmoji }
 
-
-translateText : Model -> String
-translateText model =
-    case model.direction of
-        TextToEmoji ->
-            EmojiConverter.textToEmoji defaultKey model.currentText
-
-        EmojiToText ->
-            EmojiConverter.emojiToText defaultKey model.currentText
+        SetSelectedKey newKey ->
+            { model | selectedKey = newKey }
 
 
 
@@ -129,6 +154,16 @@ view model =
                         []
                     , Html.text "Translate Emoji"
                     ]
+                ]
+            , Html.div
+                [ Html.Attributes.class "divider" ]
+                []
+            , Html.section
+                [ Html.Attributes.class "container" ]
+                [ Html.h4
+                    [ Html.Attributes.class "center" ]
+                    [ Html.text "Select your key" ]
+                , renderKeys model
                 ]
             ]
         ]
